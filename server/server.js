@@ -37,7 +37,13 @@ app.use(
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
       const normalized = origin.replace(/\/$/, '');
-      if (allowedOrigins.includes(normalized) || env.nodeEnv === 'development') {
+      if (
+        allowedOrigins.includes(normalized) ||
+        env.nodeEnv === 'development' ||
+        normalized.endsWith('.onrender.com') ||
+        normalized.endsWith('.netlify.app') ||
+        normalized.endsWith('.vercel.app')
+      ) {
         return callback(null, true);
       }
       return callback(new Error(`CORS blocked for origin: ${origin}`));
