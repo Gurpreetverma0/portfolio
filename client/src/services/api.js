@@ -6,10 +6,30 @@ export const API_BASE_URL = rawBase ? `${rawBase}/api` : '/api';
 export const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
+  timeout: 45000, // 45s timeout for Render free-tier cold starts
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+// Retry interceptor — retries once on network error or 5xx
+api.interceptors.response.use(
+  (res) => res,
+  async (error) => {
+    const config = error.config;
+    if (
+      config &&
+      !config._retried &&
+      (!error.response || error.response.status >= 500) &&
+      config.method === 'get'
+    ) {
+      config._retried = true;
+      await new Promise((r) => setTimeout(r, 2000));
+      return api(config);
+    }
+    return Promise.reject(error);
+  }
+);
 
 export const authApi = {
   login: (data) => api.post('/auth/login', data),
@@ -47,6 +67,7 @@ export const adminApi = {
     formData.append('folder', folder);
     return api.post('/admin/upload/single', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 120000,
       onUploadProgress: (e) => {
         if (onProgress && e.total) {
           onProgress(Math.round((e.loaded * 100) / e.total));
@@ -60,6 +81,7 @@ export const adminApi = {
     formData.append('folder', folder);
     return api.post('/admin/upload/multiple', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 120000,
       onUploadProgress: (e) => {
         if (onProgress && e.total) {
           onProgress(Math.round((e.loaded * 100) / e.total));

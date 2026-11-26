@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Search, Github, ExternalLink, ArrowRight, Star } from 'lucide-react';
+import { Search, Github, ExternalLink, ArrowRight, Star, FolderKanban } from 'lucide-react';
 import { usePortfolio } from '../../context/PortfolioContext';
 import { ensureHttpsUrl } from '../../utils/formatters';
+import { SectionEmpty } from '../common/Skeletons';
 
 export default function ProjectsSection() {
   const { data } = usePortfolio();
@@ -24,7 +25,7 @@ export default function ProjectsSection() {
       if (!q) return true;
       return (
         p.title.toLowerCase().includes(q) ||
-        p.shortDescription.toLowerCase().includes(q) ||
+        (p.shortDescription || '').toLowerCase().includes(q) ||
         (p.techStack || []).some((t) => t.toLowerCase().includes(q))
       );
     });
@@ -39,8 +40,6 @@ export default function ProjectsSection() {
     return list;
   }, [projects, category, search, sortBy]);
 
-  if (!projects.length) return null;
-
   return (
     <section id="projects" className="py-20 lg:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
@@ -54,48 +53,58 @@ export default function ProjectsSection() {
             </h2>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="relative">
-              <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search projects or stack..."
-                className="pl-9 pr-3.5 py-2 rounded-xl glass text-sm focus:outline-none focus:border-indigo-500"
-              />
+          {projects.length > 0 && (
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="relative">
+                <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search projects or stack..."
+                  className="pl-9 pr-3.5 py-2 rounded-xl glass text-sm focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-3 py-2 rounded-xl glass text-sm bg-white dark:bg-obsidian-900"
+              >
+                <option value="featured">Featured First</option>
+                <option value="newest">Newest</option>
+                <option value="title">A–Z</option>
+              </select>
             </div>
+          )}
+        </div>
 
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="px-3 py-2 rounded-xl glass text-sm bg-white dark:bg-obsidian-900"
-            >
-              <option value="featured">Featured First</option>
-              <option value="newest">Newest</option>
-              <option value="title">A–Z</option>
-            </select>
+        {projects.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setCategory(cat)}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition ${
+                  category === cat
+                    ? 'accent-bg text-white shadow-md'
+                    : 'glass text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
           </div>
-        </div>
+        )}
 
-        <div className="flex flex-wrap gap-2">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              type="button"
-              onClick={() => setCategory(cat)}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition ${
-                category === cat
-                  ? 'accent-bg text-white shadow-md'
-                  : 'glass text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-
-        {filtered.length === 0 ? (
+        {projects.length === 0 ? (
+          <SectionEmpty
+            icon={FolderKanban}
+            title="Projects coming soon"
+            subtitle="Showcase projects will appear here once added via the Admin Dashboard."
+          />
+        ) : filtered.length === 0 ? (
           <div className="glass-card rounded-3xl p-12 text-center text-zinc-500">
             No projects match your current filter.
           </div>
@@ -118,14 +127,16 @@ export default function ProjectsSection() {
                       className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
                     />
                   ) : (
-                    <div className="w-full h-full bg-zinc-200 dark:bg-obsidian-800 flex items-center justify-center text-zinc-500 text-sm">
-                      No Preview Image
+                    <div className="w-full h-full bg-gradient-to-br from-indigo-600/10 to-violet-600/10 dark:from-indigo-600/20 dark:to-violet-600/20 flex items-center justify-center">
+                      <FolderKanban className="w-10 h-10 text-indigo-500/50" />
                     </div>
                   )}
                   <div className="absolute top-3 left-3 flex items-center gap-1.5">
-                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-black/70 text-white backdrop-blur-md">
-                      {project.category}
-                    </span>
+                    {project.category && (
+                      <span className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-black/70 text-white backdrop-blur-md">
+                        {project.category}
+                      </span>
+                    )}
                     {project.isFeatured && (
                       <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold bg-amber-500/90 text-black">
                         <Star className="w-3 h-3 fill-current" /> Featured

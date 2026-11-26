@@ -10,6 +10,8 @@ import {
   Youtube,
   Facebook,
   MapPin,
+  Code2,
+  Sparkles,
 } from 'lucide-react';
 import { usePortfolio } from '../../context/PortfolioContext';
 import { ensureHttpsUrl } from '../../utils/formatters';
@@ -27,9 +29,12 @@ const SOCIAL_META = [
 export default function HeroSection() {
   const { data } = usePortfolio();
   const profile = data?.profile;
-  if (!profile) return null;
 
-  const socials = SOCIAL_META.filter((s) => profile.socialLinks?.[s.key]);
+  // Default hero when profile is not set up yet
+  const name = profile?.name || 'Welcome';
+  const headline = profile?.headline || 'Full-Stack Developer & Security Enthusiast';
+  const shortBio = profile?.shortBio || 'This portfolio is powered by a dynamic CMS. Add your profile details through the Admin Dashboard to customize this section.';
+  const socials = profile ? SOCIAL_META.filter((s) => profile.socialLinks?.[s.key]) : [];
 
   return (
     <section
@@ -54,27 +59,30 @@ export default function HeroSection() {
             transition={{ duration: 0.55 }}
             className="lg:col-span-7 space-y-6"
           >
-            {profile.heroBadge && (
+            {profile?.heroBadge ? (
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass text-xs font-medium text-zinc-700 dark:text-zinc-200">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span>{profile.heroBadge}</span>
+              </div>
+            ) : (
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass text-xs font-medium text-zinc-700 dark:text-zinc-200">
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <span>Open to Opportunities</span>
               </div>
             )}
 
             <div className="space-y-3">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-zinc-900 dark:text-white leading-[1.1]">
-                {profile.name}
+                {name}
               </h1>
               <p className="text-xl sm:text-2xl font-semibold accent-text">
-                {profile.headline}
+                {headline}
               </p>
             </div>
 
-            {profile.shortBio && (
-              <p className="text-base sm:text-lg text-zinc-600 dark:text-zinc-300 max-w-2xl leading-relaxed">
-                {profile.shortBio}
-              </p>
-            )}
+            <p className="text-base sm:text-lg text-zinc-600 dark:text-zinc-300 max-w-2xl leading-relaxed">
+              {shortBio}
+            </p>
 
             <div className="flex flex-wrap items-center gap-3.5 pt-2">
               <a
@@ -85,7 +93,7 @@ export default function HeroSection() {
                 <ArrowRight className="w-4 h-4" />
               </a>
 
-              {profile.resumeUrl ? (
+              {profile?.resumeUrl ? (
                 <a
                   href={profile.resumeUrl}
                   target="_blank"
@@ -120,7 +128,7 @@ export default function HeroSection() {
                   <Icon className="w-4 h-4" />
                 </a>
               ))}
-              {profile.location && (
+              {profile?.location && (
                 <span className="inline-flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 pl-2">
                   <MapPin className="w-3.5 h-3.5" />
                   {profile.location}
@@ -142,19 +150,24 @@ export default function HeroSection() {
                 style={{ backgroundColor: 'var(--accent-color, #6366f1)' }}
               />
               <div className="relative rounded-[2rem] overflow-hidden glass-card p-2">
-                {profile.profileImage ? (
+                {profile?.profileImage ? (
                   <img
                     src={profile.profileImage}
                     alt={profile.name}
                     className="w-full aspect-[4/4.3] object-cover rounded-[1.5rem]"
                   />
                 ) : (
-                  <div className="w-full aspect-[4/4.3] rounded-[1.5rem] bg-zinc-200 dark:bg-obsidian-800 flex items-center justify-center text-5xl font-bold text-zinc-500">
-                    {profile.name?.charAt(0)}
+                  <div className="w-full aspect-[4/4.3] rounded-[1.5rem] bg-gradient-to-br from-indigo-600/20 via-violet-600/10 to-cyan-600/20 dark:from-indigo-600/30 dark:via-violet-600/20 dark:to-cyan-600/30 flex flex-col items-center justify-center gap-4">
+                    <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center shadow-2xl shadow-indigo-500/30">
+                      <Code2 className="w-12 h-12 text-white" />
+                    </div>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
+                      Upload your photo in Admin → Profile
+                    </p>
                   </div>
                 )}
 
-                {Array.isArray(profile.highlights) && profile.highlights.length > 0 && (
+                {Array.isArray(profile?.highlights) && profile.highlights.length > 0 && (
                   <div className="grid grid-cols-3 gap-2 p-3 mt-1">
                     {profile.highlights.slice(0, 3).map((h, i) => (
                       <div

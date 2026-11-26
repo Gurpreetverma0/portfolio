@@ -16,6 +16,7 @@ import {
   Globe,
   Twitter,
   Instagram,
+  PenTool,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { z } from 'zod';
@@ -23,11 +24,11 @@ import { usePortfolio } from '../../context/PortfolioContext';
 import { publicApi } from '../../services/api';
 import { ensureHttpsUrl, formatFullDate } from '../../utils/formatters';
 import Modal from '../common/Modal';
+import { SectionEmpty } from '../common/Skeletons';
 
 export function BlogSection() {
   const { data } = usePortfolio();
   const blogs = data?.blogs || [];
-  if (!blogs.length) return null;
 
   return (
     <section id="blog" className="py-20 lg:py-24">
@@ -41,59 +42,67 @@ export function BlogSection() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {blogs.map((post, idx) => (
-            <motion.article
-              key={post._id}
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: idx * 0.05 }}
-              className="group glass-card rounded-3xl overflow-hidden flex flex-col"
-            >
-              {post.coverImage && (
-                <Link to={`/blog/${post.slug}`} className="h-44 overflow-hidden block">
-                  <img
-                    src={post.coverImage}
-                    alt={post.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-                  />
-                </Link>
-              )}
-              <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
-                <div className="space-y-2.5">
-                  <div className="flex items-center justify-between text-xs text-zinc-500">
-                    <span className="font-semibold accent-text">{post.category}</span>
-                    <span className="inline-flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> {post.readTimeMinutes || 4} min read
-                    </span>
+        {blogs.length === 0 ? (
+          <SectionEmpty
+            icon={PenTool}
+            title="Articles coming soon"
+            subtitle="Technical write-ups, tutorials, and security insights will appear here once published via Admin."
+          />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {blogs.map((post, idx) => (
+              <motion.article
+                key={post._id}
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: idx * 0.05 }}
+                className="group glass-card rounded-3xl overflow-hidden flex flex-col hover:border-indigo-500/40 transition"
+              >
+                {post.coverImage && (
+                  <Link to={`/blog/${post.slug}`} className="h-44 overflow-hidden block">
+                    <img
+                      src={post.coverImage}
+                      alt={post.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                    />
+                  </Link>
+                )}
+                <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between text-xs text-zinc-500">
+                      <span className="font-semibold accent-text">{post.category}</span>
+                      <span className="inline-flex items-center gap-1">
+                        <Clock className="w-3 h-3" /> {post.readTimeMinutes || 4} min read
+                      </span>
+                    </div>
+                    <Link
+                      to={`/blog/${post.slug}`}
+                      className="text-lg font-bold text-zinc-900 dark:text-white group-hover:accent-text transition line-clamp-2 block"
+                    >
+                      {post.title}
+                    </Link>
+                    <p className="text-sm text-zinc-600 dark:text-zinc-400 line-clamp-3">
+                      {post.excerpt}
+                    </p>
                   </div>
-                  <Link
-                    to={`/blog/${post.slug}`}
-                    className="text-lg font-bold text-zinc-900 dark:text-white group-hover:accent-text transition line-clamp-2 block"
-                  >
-                    {post.title}
-                  </Link>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400 line-clamp-3">
-                    {post.excerpt}
-                  </p>
-                </div>
 
-                <div className="flex items-center justify-between pt-3 border-t border-zinc-200/70 dark:border-white/[0.06] text-xs">
-                  <span className="text-zinc-500">
-                    {formatFullDate(post.publishedAt || post.createdAt)}
-                  </span>
-                  <Link
-                    to={`/blog/${post.slug}`}
-                    className="inline-flex items-center gap-1 font-semibold accent-text hover:underline"
-                  >
-                    Read Article <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
+                  <div className="flex items-center justify-between pt-3 border-t border-zinc-200/70 dark:border-white/[0.06] text-xs">
+                    <span className="text-zinc-500">
+                      {formatFullDate(post.publishedAt || post.createdAt)}
+                    </span>
+                    <Link
+                      to={`/blog/${post.slug}`}
+                      className="inline-flex items-center gap-1 font-semibold accent-text hover:underline"
+                    >
+                      Read Article <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            </motion.article>
-          ))}
-        </div>
+              </motion.article>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -109,7 +118,7 @@ export function ResumeSection() {
   return (
     <section id="resume" className="py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="glass-card rounded-3xl p-8 sm:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="glass-card rounded-3xl p-8 sm:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:border-indigo-500/40 transition">
           <div className="flex items-start gap-4">
             <div className="p-3.5 rounded-2xl bg-indigo-500/10 accent-text shrink-0">
               <FileText className="w-7 h-7" />
@@ -168,7 +177,7 @@ export function ResumeSection() {
 
 const contactSchema = z.object({
   name: z.string().trim().min(2, 'Name must be at least 2 characters'),
-  email: z.string().trim().email('Please enter a valid email'),
+  email: z.string().trim().email('Please enter a valid email address'),
   subject: z.string().trim().min(3, 'Subject must be at least 3 characters'),
   message: z.string().trim().min(10, 'Message must be at least 10 characters'),
 });
@@ -190,10 +199,10 @@ export function ContactSection() {
     setSending(true);
     try {
       const res = await publicApi.submitContact(parsed.data);
-      toast.success(res.data.message || 'Message sent!');
+      toast.success(res.data.message || 'Thank you! Your message has been sent successfully.');
       setForm({ name: '', email: '', subject: '', message: '' });
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to send message');
+      toast.error(err.response?.data?.message || 'Failed to send message. Please try again.');
     } finally {
       setSending(false);
     }
@@ -215,7 +224,7 @@ export function ContactSection() {
           <div className="lg:col-span-5 space-y-5">
             <div className="glass-card rounded-3xl p-7 space-y-5">
               <p className="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed">
-                Have an engineering role, security audit, freelance project, or collaboration in mind? Send a message directly—every inquiry is persisted securely and reviewed promptly.
+                Have an engineering role, security audit, freelance project, or collaboration in mind? Send a message directly—every inquiry is stored securely and reviewed promptly.
               </p>
 
               <div className="space-y-3 text-sm">
@@ -253,7 +262,7 @@ export function ContactSection() {
                   required
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="Alex Rivera"
+                  placeholder="Gurpreet Verma"
                   className="w-full px-4 py-2.5 rounded-xl bg-zinc-50 dark:bg-obsidian-800 border border-zinc-200 dark:border-white/10 text-sm focus:outline-none focus:border-indigo-500"
                 />
               </div>
@@ -264,7 +273,7 @@ export function ContactSection() {
                   required
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  placeholder="alex@company.com"
+                  placeholder="yourname@domain.com"
                   className="w-full px-4 py-2.5 rounded-xl bg-zinc-50 dark:bg-obsidian-800 border border-zinc-200 dark:border-white/10 text-sm focus:outline-none focus:border-indigo-500"
                 />
               </div>
@@ -327,13 +336,13 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="text-center md:text-left">
           <p className="font-display font-bold text-lg text-zinc-900 dark:text-white">
-            {settings?.logoText || profile?.name || 'Portfolio'}
+            {settings?.logoText || profile?.name || 'Gurpreet Verma'}
           </p>
           <p className="text-xs text-zinc-500 mt-1">
             {settings?.footerText || 'Engineered with security, performance, and craft.'}
           </p>
           <p className="text-xs text-zinc-500 mt-1">
-            {settings?.copyrightText || `© ${new Date().getFullYear()} ${profile?.name || ''}. All rights reserved.`}
+            {settings?.copyrightText || `© ${new Date().getFullYear()} ${profile?.name || 'Gurpreet Verma'}. All rights reserved.`}
           </p>
         </div>
 

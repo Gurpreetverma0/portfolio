@@ -1,11 +1,25 @@
 import { motion } from 'framer-motion';
-import { Compass, Heart, Mail, MapPin, Briefcase } from 'lucide-react';
+import { Compass, Heart, Mail, MapPin, Briefcase, User } from 'lucide-react';
 import { usePortfolio } from '../../context/PortfolioContext';
+import { SectionEmpty } from '../common/Skeletons';
 
 export default function AboutSection() {
   const { data } = usePortfolio();
   const profile = data?.profile;
-  if (!profile) return null;
+
+  if (!profile?.fullBio && !profile?.shortBio) {
+    return (
+      <section id="about" className="py-20 lg:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          <div className="max-w-2xl">
+            <p className="text-xs font-mono uppercase tracking-widest accent-text mb-2">01 / About Me</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-zinc-900 dark:text-white">About Me</h2>
+          </div>
+          <SectionEmpty icon={User} title="About section coming soon" subtitle="Profile details will appear here once configured via Admin Dashboard." />
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="about" className="py-20 lg:py-24">
@@ -20,7 +34,7 @@ export default function AboutSection() {
           <div className="max-w-2xl">
             <p className="text-xs font-mono uppercase tracking-widest accent-text mb-2">01 / About Me</p>
             <h2 className="text-3xl sm:text-4xl font-bold text-zinc-900 dark:text-white">
-              Engineering with Clarity & Security
+              {profile.aboutTitle || 'Engineering with Clarity & Security'}
             </h2>
           </div>
 
@@ -51,21 +65,25 @@ export default function AboutSection() {
                 <div className="space-y-3 text-sm">
                   {profile.email && (
                     <div className="flex items-center gap-3">
-                      <Mail className="w-4 h-4 accent-text shrink-0" />
-                      <a href={`mailto:${profile.email}`} className="hover:underline truncate">
-                        {profile.email}
-                      </a>
+                      <div className="p-2 rounded-xl bg-indigo-500/10 accent-text shrink-0">
+                        <Mail className="w-4 h-4" />
+                      </div>
+                      <a href={`mailto:${profile.email}`} className="hover:underline truncate">{profile.email}</a>
                     </div>
                   )}
                   {profile.location && (
                     <div className="flex items-center gap-3">
-                      <MapPin className="w-4 h-4 accent-text shrink-0" />
+                      <div className="p-2 rounded-xl bg-indigo-500/10 accent-text shrink-0">
+                        <MapPin className="w-4 h-4" />
+                      </div>
                       <span>{profile.location}</span>
                     </div>
                   )}
                   {profile.yearsOfExperience && (
                     <div className="flex items-center gap-3">
-                      <Briefcase className="w-4 h-4 accent-text shrink-0" />
+                      <div className="p-2 rounded-xl bg-indigo-500/10 accent-text shrink-0">
+                        <Briefcase className="w-4 h-4" />
+                      </div>
                       <span>{profile.yearsOfExperience} Years Building Systems</span>
                     </div>
                   )}

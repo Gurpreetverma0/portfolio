@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, RefreshCw, Shield, Wrench } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Shield, Wrench, Server } from 'lucide-react';
 import { usePortfolio } from '../context/PortfolioContext';
 import { publicApi } from '../services/api';
 import Navbar from '../components/portfolio/Navbar';
@@ -40,27 +40,39 @@ const SECTION_COMPONENTS = {
 const DEFAULT_ORDER = Object.keys(SECTION_COMPONENTS);
 
 export default function HomePage() {
-  const { data, loading, error, refreshPortfolio } = usePortfolio();
+  const { data, loading, error, coldStart, refreshPortfolio } = usePortfolio();
 
   useEffect(() => {
     publicApi.trackView('/');
   }, []);
 
-  if (loading) return <PageLoader />;
+  if (loading) return <PageLoader coldStart={coldStart} />;
 
   if (error) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-white dark:bg-obsidian-950">
-        <div className="glass-card rounded-3xl p-8 max-w-md space-y-4">
-          <AlertTriangle className="w-10 h-10 text-amber-500 mx-auto" />
-          <h1 className="text-xl font-bold">Connection Issue</h1>
-          <p className="text-sm text-zinc-500">{error}</p>
+        <div className="glass-card rounded-3xl p-8 sm:p-10 max-w-md space-y-5">
+          {error.includes('cold start') || error.includes('waking') ? (
+            <div className="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center mx-auto">
+              <Server className="w-7 h-7" />
+            </div>
+          ) : (
+            <div className="w-14 h-14 rounded-2xl bg-red-500/10 text-red-500 flex items-center justify-center mx-auto">
+              <AlertTriangle className="w-7 h-7" />
+            </div>
+          )}
+          <div>
+            <h1 className="text-xl font-bold text-zinc-900 dark:text-white">
+              {error.includes('cold start') ? 'Server Starting Up' : 'Connection Issue'}
+            </h1>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-2 leading-relaxed">{error}</p>
+          </div>
           <button
             type="button"
             onClick={refreshPortfolio}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-indigo-600 text-white text-sm font-semibold shadow-lg shadow-indigo-500/20 hover:bg-indigo-500 transition"
           >
-            <RefreshCw className="w-4 h-4" /> Retry
+            <RefreshCw className="w-4 h-4" /> Try Again
           </button>
         </div>
       </div>

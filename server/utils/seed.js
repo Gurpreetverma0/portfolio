@@ -94,7 +94,10 @@ export const ensureInitialSetup = async () => {
     Project.countDocuments(),
   ]);
 
-  if (skillCount === 0 && projectCount === 0) {
+  // Only auto-seed sample records on the very first fresh database run
+  // when no admin existed previously. Never resurrect dummy records if the admin
+  // intentionally deleted or managed them.
+  if (adminCount === 0 && skillCount === 0 && projectCount === 0) {
     await Promise.all([
       Skill.insertMany([
         { name: 'JavaScript / TypeScript', category: 'Languages', level: 92, icon: 'Code2', yearsOfExperience: '3 yrs', displayOrder: 1 },
