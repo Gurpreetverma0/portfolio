@@ -12,6 +12,22 @@ export const api = axios.create({
   },
 });
 
+// Request interceptor: attach Bearer token from localStorage for seamless cross-site auth
+api.interceptors.request.use(
+  (config) => {
+    try {
+      const token = localStorage.getItem('portfolio_admin_token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch {
+      // localStorage may be unavailable in some private contexts
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 // Retry interceptor — retries once on network error or 5xx
 api.interceptors.response.use(
   (res) => res,

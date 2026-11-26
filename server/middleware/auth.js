@@ -25,7 +25,17 @@ export const signAdminToken = (admin) => {
 
 export const protectAdmin = async (req, res, next) => {
   try {
-    const token = req.cookies?.[COOKIE_NAME];
+    let token = req.cookies?.[COOKIE_NAME];
+
+    // Fallback: accept token from Authorization: Bearer <token> header
+    // Essential for cross-origin deployments where browsers block 3rd-party cookies
+    if (!token && req.headers.authorization) {
+      const parts = req.headers.authorization.split(' ');
+      if (parts.length === 2 && /^Bearer$/i.test(parts[0])) {
+        token = parts[1].trim();
+      }
+    }
+
     if (!token) {
       return res.status(401).json({ success: false, message: 'Authentication required' });
     }

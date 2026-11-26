@@ -31,6 +31,7 @@ export const loginAdmin = asyncHandler(async (req, res) => {
 
   res.json({
     success: true,
+    token,
     data: {
       id: admin._id,
       name: admin.name,
@@ -90,5 +91,8 @@ export const changePassword = asyncHandler(async (req, res) => {
   admin.passwordHash = await Admin.hashPassword(newPassword);
   await admin.save();
 
-  res.json({ success: true, message: 'Password updated successfully' });
+  const token = signAdminToken(admin);
+  res.cookie(COOKIE_NAME, token, getCookieOptions());
+
+  res.json({ success: true, token, message: 'Password updated successfully' });
 });

@@ -12,6 +12,9 @@ export const AuthProvider = ({ children }) => {
       const res = await authApi.me();
       setAdmin(res.data.data);
     } catch {
+      try {
+        localStorage.removeItem('portfolio_admin_token');
+      } catch {}
       setAdmin(null);
     } finally {
       setLoading(false);
@@ -24,6 +27,11 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     const res = await authApi.login(credentials);
+    if (res.data.token) {
+      try {
+        localStorage.setItem('portfolio_admin_token', res.data.token);
+      } catch {}
+    }
     setAdmin(res.data.data);
     return res.data.data;
   };
@@ -32,6 +40,9 @@ export const AuthProvider = ({ children }) => {
     try {
       await authApi.logout();
     } finally {
+      try {
+        localStorage.removeItem('portfolio_admin_token');
+      } catch {}
       setAdmin(null);
     }
   };
